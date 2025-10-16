@@ -17,7 +17,7 @@
             </p>
         </div>
         <div class="p-6 pt-0">
-            <form method="POST" action="{{ route('login') }}" class="space-y-4">
+            <form method="POST" action="{{ route('login.post') }}" class="space-y-4">
                 @csrf
                 <div class="space-y-2">
                     <label for="email" class="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">Email</label>
