@@ -1,11 +1,50 @@
-@import 'tailwindcss';
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
 
-@source '../../vendor/laravel/framework/src/Illuminate/Pagination/resources/views/*.blade.php';
-@source '../../storage/framework/views/*.php';
-@source '../**/*.blade.php';
-@source '../**/*.js';
+@layer base {
+    html {
+        font-family: 'Figtree', ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji';
+    }
+}
 
-@theme {
-    --font-sans: 'Instrument Sans', ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji',
-        'Segoe UI Symbol', 'Noto Color Emoji';
+@layer components {
+    .btn {
+        @apply px-4 py-2 rounded-md font-medium transition-colors duration-200;
+    }
+    
+    .btn-primary {
+        @apply bg-primary text-primary-foreground hover:bg-primary/90 focus:ring-2 focus:ring-primary focus:ring-offset-2;
+    }
+    
+    .btn-secondary {
+        @apply bg-secondary text-secondary-foreground hover:bg-secondary/90 focus:ring-2 focus:ring-secondary focus:ring-offset-2;
+    }
+    
+    .gradient-text {
+        background: linear-gradient(135deg, hsl(262 83% 58%), hsl(220 70% 50%));
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+    }
+    
+    .gradient-bg {
+        background: linear-gradient(135deg, hsl(262 83% 58%), hsl(220 70% 50%));
+    }
+    
+    .gradient-bg-light {
+        background: linear-gradient(135deg, hsl(262 83% 58% / 0.1), hsl(220 70% 50% / 0.1));
+    }
+    
+    .sidebar-collapsed {
+        width: 3.5rem;
+    }
+    
+    .sidebar-expanded {
+        width: 16rem;
+    }
+    
+    .sidebar-transition {
+        transition: width 0.2s ease-in-out;
+    }
 }

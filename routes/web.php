@@ -8,6 +8,10 @@ Route::get('/', function () {
     return view('auth.login');
 })->name('login');
 
+Route::get('/test-tailwind', function () {
+    return view('test-tailwind');
+})->name('test.tailwind');
+
 Route::post('/login', function (Request $request) {
     $credentials = $request->validate([
         'email' => ['required', 'email'],
