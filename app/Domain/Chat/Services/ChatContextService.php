@@ -18,6 +18,8 @@ class ChatContextService
             'current_intent' => null,
             'travel_context' => null,
             'suggestions' => [],
+            'detected_language' => null,
+            'language_confidence' => 0.0,
         ]);
     }
 
@@ -44,6 +46,33 @@ class ChatContextService
         }
 
         $this->updateContext($sessionId, ['messages' => $context['messages']]);
+    }
+
+    public function detectAndUpdateLanguage(string $sessionId, string $message): string
+    {
+        $languageDetection = app(\App\Domain\Chat\Services\LanguageDetectionService::class);
+        $detectedLanguage = $languageDetection->detectLanguage($message);
+        $confidence = $languageDetection->getConfidenceScore($message, $detectedLanguage);
+
+        // Só atualizar se a confiança for alta (>= 0.3) e for diferente do idioma atual
+        $context = $this->getContext($sessionId);
+        $currentLanguage = $context['detected_language'];
+
+        if ($confidence >= 0.3 && $detectedLanguage !== $currentLanguage) {
+            $this->updateContext($sessionId, [
+                'detected_language' => $detectedLanguage,
+                'language_confidence' => $confidence,
+            ]);
+        }
+
+        return $detectedLanguage;
+    }
+
+    public function getDetectedLanguage(string $sessionId): ?string
+    {
+        $context = $this->getContext($sessionId);
+
+        return $context['detected_language'];
     }
 
     public function detectIntent(string $message): string

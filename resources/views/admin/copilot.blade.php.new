@@ -1,0 +1,553 @@
+@extends('layouts.admin')
+
+@section('title', 'AI Copilot - Admin Panel')
+
+@section('content')
+<div class="h-[calc(100vh-4rem-50px)] flex flex-col">
+    <div class="mb-4 flex-shrink-0">
+        <h1 class="text-4xl font-bold mb-2 gradient-text">
+            AI Copilot
+        </h1>
+        <p class="text-muted-foreground">
+            Seu assistente inteligente para otimizar tarefas e obter insights
+        </p>
+    </div>
+
+    <div class="flex flex-row gap-6 flex-1 min-h-0">
+        <!-- Chat Area -->
+        <div class="w-3/4 rounded-lg border bg-card text-card-foreground shadow-sm flex flex-col">
+            <div class="flex flex-col space-y-1.5 p-6 flex-shrink-0">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <h3 class="text-2xl font-semibold leading-none tracking-tight">Chat com IA</h3>
+                        <p class="text-sm text-muted-foreground">
+                            Preencha o template de viagem para criar o seu pacote personalizado
+                        </p>
+                    </div>
+                    <button id="new-chat-btn" class="px-4 py-2 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 transition-colors">
+                        <svg class="h-4 w-4 inline mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
+                        </svg>
+                        Novo Chat
+                    </button>
+                </div>
+            </div>
+            
+            <div class="flex-1 flex flex-col min-h-0">
+                <div class="flex-1 p-6 overflow-y-auto" id="chat-container">
+                    <div class="space-y-4" id="chat-messages">
+                        <div class="flex gap-3 justify-start">
+                            <div class="h-8 w-8 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0">
+                                <svg class="h-4 w-4 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path>
+                                </svg>
+                            </div>
+                            <div class="max-w-[40%] rounded-2xl px-4 py-3 bg-muted">
+                                <p class="text-sm" id="greeting-message">Carregando...</p>
+                                <p class="text-xs opacity-60 mt-1" id="greeting-time"></p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="border-t p-4 flex-shrink-0">
+                    <form class="flex gap-2">
+                        <input
+                            type="text"
+                            placeholder="Digite sua mensagem..."
+                            class="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-base ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium file:text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 md:text-sm"
+                        />
+                        <button type="submit" class="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 h-10 w-10">
+                            <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"></path>
+                            </svg>
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Template Visual -->
+        <div class="w-1/4 rounded-lg border bg-card text-card-foreground shadow-sm flex flex-col">
+            <div class="flex flex-col space-y-1.5 p-6 flex-shrink-0">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <h3 class="text-xl font-semibold leading-none tracking-tight">Template de Viagem</h3>
+                        <p class="text-sm text-muted-foreground">
+                            Informações coletadas
+                        </p>
+                    </div>
+                    <div class="text-right">
+                        <div class="text-2xl font-bold text-primary" id="completion-percentage">0%</div>
+                        <div class="text-xs text-muted-foreground">Completo</div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="flex-1 p-6 overflow-y-auto">
+                <div class="space-y-4" id="template-fields">
+                    <!-- Template fields will be populated here -->
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+console.log('Chat script loading...');
+
+document.addEventListener('DOMContentLoaded', function() {
+    console.log('DOM loaded, setting up chat...');
+    
+    // Carregar saudação inicial
+    loadGreeting();
+    
+    // Configurar envio de mensagens
+    setupMessageSending();
+    
+    // Configurar botão novo chat
+    setupNewChatButton();
+    
+    // Configurar atualização do template
+    setupTemplateUpdates();
+});
+
+async function loadGreeting() {
+    console.log('Loading greeting...');
+    try {
+        const response = await fetch('/api/chat/initialize', {
+            method: 'GET',
+            headers: {
+                'Accept': 'application/json',
+                'Accept-Language': navigator.language || 'pt-PT'
+            }
+        });
+        
+        if (response.ok) {
+            const data = await response.json();
+            document.getElementById('greeting-message').textContent = data.message;
+            document.getElementById('greeting-time').textContent = new Date().toLocaleTimeString('pt-PT', { 
+                hour: '2-digit', 
+                minute: '2-digit' 
+            });
+            console.log('Greeting loaded:', data.message);
+            
+            // Carregar template inicial se houver session_id
+            if (data.session_id) {
+                updateTemplateData(data.session_id);
+            }
+        } else {
+            document.getElementById('greeting-message').textContent = 'Olá! Sou seu assistente AI. Como posso ajudar você hoje?';
+            document.getElementById('greeting-time').textContent = new Date().toLocaleTimeString('pt-PT', { 
+                hour: '2-digit', 
+                minute: '2-digit' 
+            });
+            console.log('Using fallback greeting');
+        }
+    } catch (error) {
+        console.error('Erro ao carregar saudação:', error);
+        document.getElementById('greeting-message').textContent = 'Olá! Sou seu assistente AI. Como posso ajudar você hoje?';
+        document.getElementById('greeting-time').textContent = new Date().toLocaleTimeString('pt-PT', { 
+            hour: '2-digit', 
+            minute: '2-digit' 
+        });
+    }
+}
+
+function setupMessageSending() {
+    console.log('Setting up message sending...');
+    const form = document.querySelector('form');
+    const input = document.querySelector('input[type="text"]');
+    const button = document.querySelector('button[type="submit"]');
+    let currentSessionId = null;
+    let isWaitingForResponse = false;
+    
+    console.log('Form found:', form);
+    console.log('Input found:', input);
+    console.log('Button found:', button);
+    
+    if (!form || !input || !button) {
+        console.error('Form, input or button not found!');
+        return;
+    }
+    
+    // Função para detectar idioma da mensagem
+    function detectMessageLanguage(message) {
+        const portugueseWords = ['olá', 'como', 'estás', 'preciso', 'ajuda', 'viagem', 'para', 'com', 'uma', 'boa', 'tarde', 'noite', 'planeamento', 'planejar', 'quero', 'gostaria', 'nome', 'meu', 'minha', 'sou', 'chamo-me', 'parto', 'vou', 'destino'];
+        const spanishWords = ['hola', 'como', 'estás', 'necesito', 'ayuda', 'viaje', 'para', 'con', 'una', 'buenas', 'tardes', 'noches', 'planificación', 'quiero', 'me', 'gustaría', 'nombre', 'mi', 'soy', 'llamo', 'parto', 'voy', 'destino'];
+        const frenchWords = ['bonjour', 'comment', 'allez', 'besoin', 'aide', 'voyage', 'pour', 'avec', 'une', 'bonne', 'soirée', 'planification', 'je', 'veux', 'aimerais', 'nom', 'mon', 'ma', 'suis', 'appelle', 'partir', 'vais'];
+        const germanWords = ['hallo', 'wie', 'geht', 'brauche', 'hilfe', 'reise', 'für', 'mit', 'eine', 'gute', 'abend', 'planung', 'ich', 'möchte', 'würde', 'name', 'mein', 'meine', 'bin', 'heiße', 'abreise', 'gehe'];
+        const italianWords = ['ciao', 'come', 'stai', 'ho', 'bisogno', 'aiuto', 'viaggio', 'per', 'con', 'una', 'buona', 'sera', 'pianificazione', 'voglio', 'vorrei', 'nome', 'mio', 'mia', 'sono', 'mi', 'chiamo', 'parto', 'vado'];
+        const englishWords = ['hello', 'hi', 'how', 'are', 'you', 'need', 'help', 'planning', 'trip', 'to', 'with', 'good', 'morning', 'afternoon', 'evening', 'i', 'want', 'would', 'name', 'my', 'am', 'call', 'leaving', 'going'];
+        
+        const lowerMessage = message.toLowerCase();
+        
+        // Contar palavras de cada idioma
+        const counts = {
+            'pt': portugueseWords.filter(word => lowerMessage.includes(word)).length,
+            'es': spanishWords.filter(word => lowerMessage.includes(word)).length,
+            'fr': frenchWords.filter(word => lowerMessage.includes(word)).length,
+            'de': germanWords.filter(word => lowerMessage.includes(word)).length,
+            'it': italianWords.filter(word => lowerMessage.includes(word)).length,
+            'en': englishWords.filter(word => lowerMessage.includes(word)).length,
+        };
+        
+        // Retornar o idioma com mais palavras encontradas
+        const detectedLanguage = Object.keys(counts).reduce((a, b) => counts[a] > counts[b] ? a : b);
+        
+        // Se não encontrou palavras específicas, usar padrão baseado no browser
+        return counts[detectedLanguage] > 0 ? detectedLanguage : 'pt';
+    }
+    
+    // Função para enviar mensagem
+    async function sendMessage() {
+        const message = input.value.trim();
+        console.log('Sending message:', message);
+        
+        if (!message || isWaitingForResponse) {
+            console.log('Message empty or waiting for response');
+            return;
+        }
+        
+        // Detectar idioma da mensagem
+        const detectedLanguage = detectMessageLanguage(message);
+        console.log('Detected language:', detectedLanguage);
+        
+        // Adicionar mensagem do usuário
+        console.log('Adding user message to chat');
+        addUserMessage(message);
+        input.value = '';
+        
+        // Adicionar indicador de processamento
+        console.log('Adding processing message');
+        addProcessingMessage();
+        isWaitingForResponse = true;
+        
+        // Enviar para API
+        try {
+            console.log('Sending to API...');
+            const response = await fetch('/api/chat/message', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json',
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+                },
+                body: JSON.stringify({
+                    message: message,
+                    language: detectedLanguage,
+                    session_id: currentSessionId
+                })
+            });
+            
+            console.log('API response:', response.status);
+            
+            if (response.ok) {
+                const data = await response.json();
+                console.log('API data:', data);
+                currentSessionId = data.session_id;
+                
+                // Iniciar polling para verificar resposta
+                console.log('Starting polling...');
+                startPollingForResponse(currentSessionId);
+                
+                // Atualizar template após envio da mensagem
+                updateTemplateData(currentSessionId);
+            } else {
+                console.error('API error:', response.status);
+                removeProcessingMessage();
+                addBotMessage('Desculpe, ocorreu um erro ao processar sua mensagem.');
+                isWaitingForResponse = false;
+            }
+        } catch (error) {
+            console.error('Erro ao enviar mensagem:', error);
+            removeProcessingMessage();
+            addBotMessage('Desculpe, ocorreu um erro ao processar sua mensagem.');
+            isWaitingForResponse = false;
+        }
+    }
+    
+    // Adicionar evento ao botão
+    button.addEventListener('click', function(e) {
+        console.log('Button clicked!');
+        e.preventDefault();
+        sendMessage();
+    });
+    
+    // Adicionar evento ao form para Enter
+    form.addEventListener('submit', function(e) {
+        console.log('Form submitted!');
+        e.preventDefault();
+        sendMessage();
+    });
+    
+    // Adicionar evento ao input para Enter
+    input.addEventListener('keypress', function(e) {
+        if (e.key === 'Enter') {
+            console.log('Enter pressed!');
+            e.preventDefault();
+            sendMessage();
+        }
+    });
+    
+    function startPollingForResponse(sessionId) {
+        const pollInterval = setInterval(async () => {
+            try {
+                const response = await fetch(`/api/chat/response/${sessionId}`, {
+                    method: 'GET',
+                    headers: {
+                        'Accept': 'application/json',
+                    }
+                });
+                
+                if (response.ok) {
+                    const data = await response.json();
+                    
+                    if (data.message) {
+                        // Resposta recebida!
+                        clearInterval(pollInterval);
+                        removeProcessingMessage();
+                        addBotMessage(data.message);
+                        isWaitingForResponse = false;
+                        
+                        // Atualizar template após receber resposta
+                        updateTemplateData(sessionId);
+                    }
+                }
+            } catch (error) {
+                console.error('Erro ao verificar resposta:', error);
+                clearInterval(pollInterval);
+                removeProcessingMessage();
+                addBotMessage('Desculpe, ocorreu um erro ao obter a resposta.');
+                isWaitingForResponse = false;
+            }
+        }, 1000); // Verificar a cada segundo
+        
+        // Timeout após 30 segundos
+        setTimeout(() => {
+            clearInterval(pollInterval);
+            if (isWaitingForResponse) {
+                removeProcessingMessage();
+                addBotMessage('Desculpe, a resposta demorou muito para chegar. Tente novamente.');
+                isWaitingForResponse = false;
+            }
+        }, 30000);
+    }
+}
+
+function addUserMessage(message) {
+    console.log('Adding user message:', message);
+    const chatMessages = document.getElementById('chat-messages');
+    console.log('Chat messages container:', chatMessages);
+    
+    if (!chatMessages) {
+        console.error('Chat messages container not found!');
+        return;
+    }
+    
+    const messageDiv = document.createElement('div');
+    messageDiv.className = 'flex gap-3 justify-end';
+    messageDiv.innerHTML = `
+        <div class="max-w-[40%] rounded-2xl px-4 py-3 bg-primary text-primary-foreground">
+            <p class="text-sm">${message}</p>
+            <p class="text-xs opacity-60 mt-1">${new Date().toLocaleTimeString('pt-PT', { hour: '2-digit', minute: '2-digit' })}</p>
+        </div>
+        <div class="h-8 w-8 rounded-full bg-secondary/10 flex items-center justify-center flex-shrink-0">
+            <svg class="h-4 w-4 text-secondary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
+            </svg>
+        </div>
+    `;
+    chatMessages.appendChild(messageDiv);
+    scrollToBottom();
+    console.log('User message added to chat');
+}
+
+function addBotMessage(message) {
+    const chatMessages = document.getElementById('chat-messages');
+    const messageDiv = document.createElement('div');
+    messageDiv.className = 'flex gap-3 justify-start';
+    messageDiv.innerHTML = `
+        <div class="h-8 w-8 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0">
+            <svg class="h-4 w-4 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path>
+            </svg>
+        </div>
+        <div class="max-w-[40%] rounded-2xl px-4 py-3 bg-muted">
+            <p class="text-sm">${message}</p>
+            <p class="text-xs opacity-60 mt-1">${new Date().toLocaleTimeString('pt-PT', { hour: '2-digit', minute: '2-digit' })}</p>
+        </div>
+    `;
+    chatMessages.appendChild(messageDiv);
+    scrollToBottom();
+}
+
+function addProcessingMessage() {
+    const chatMessages = document.getElementById('chat-messages');
+    const messageDiv = document.createElement('div');
+    messageDiv.className = 'flex gap-3 justify-start';
+    messageDiv.id = 'processing-message';
+    messageDiv.innerHTML = `
+        <div class="h-8 w-8 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0">
+            <svg class="h-4 w-4 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path>
+            </svg>
+        </div>
+        <div class="max-w-[40%] rounded-2xl px-4 py-3 bg-muted">
+            <div class="flex items-center gap-2">
+                <div class="flex space-x-1">
+                    <div class="w-2 h-2 bg-primary rounded-full animate-bounce"></div>
+                    <div class="w-2 h-2 bg-primary rounded-full animate-bounce" style="animation-delay: 0.1s"></div>
+                    <div class="w-2 h-2 bg-primary rounded-full animate-bounce" style="animation-delay: 0.2s"></div>
+                </div>
+                <p class="text-sm text-muted-foreground">Processando...</p>
+            </div>
+        </div>
+    `;
+    chatMessages.appendChild(messageDiv);
+    scrollToBottom();
+}
+
+function removeProcessingMessage() {
+    const processingMessage = document.getElementById('processing-message');
+    if (processingMessage) {
+        processingMessage.remove();
+    }
+}
+
+function setupNewChatButton() {
+    console.log('Setting up new chat button...');
+    const newChatBtn = document.getElementById('new-chat-btn');
+    
+    if (!newChatBtn) {
+        console.error('New chat button not found!');
+        return;
+    }
+    
+    newChatBtn.addEventListener('click', function() {
+        console.log('New chat button clicked!');
+        
+        // Limpar mensagens do chat
+        const chatMessages = document.getElementById('chat-messages');
+        if (chatMessages) {
+            chatMessages.innerHTML = '';
+            console.log('Chat messages cleared');
+        }
+        
+        // Limpar template
+        const templateFields = document.getElementById('template-fields');
+        const completionPercentage = document.getElementById('completion-percentage');
+        if (templateFields) {
+            templateFields.innerHTML = '';
+        }
+        if (completionPercentage) {
+            completionPercentage.textContent = '0%';
+        }
+        
+        // Resetar variáveis
+        currentSessionId = null;
+        isWaitingForResponse = false;
+        
+        // Carregar nova saudação
+        loadGreeting();
+        
+        console.log('New chat started');
+    });
+    
+    console.log('New chat button setup complete');
+}
+
+function setupTemplateUpdates() {
+    console.log('Setting up template updates...');
+    // Template será atualizado quando houver uma sessão ativa
+}
+
+async function updateTemplateData(sessionId) {
+    if (!sessionId) {
+        console.log('No session ID, skipping template update');
+        return;
+    }
+    
+    try {
+        console.log('Updating template data for session:', sessionId);
+        const response = await fetch(`/api/chat/template/${sessionId}`, {
+            method: 'GET',
+            headers: {
+                'Accept': 'application/json',
+            }
+        });
+        
+        if (response.ok) {
+            const data = await response.json();
+            console.log('Template data received:', data);
+            renderTemplate(data);
+        } else {
+            console.error('Failed to fetch template data:', response.status);
+        }
+    } catch (error) {
+        console.error('Error fetching template data:', error);
+    }
+}
+
+function renderTemplate(data) {
+    const templateFields = document.getElementById('template-fields');
+    const completionPercentage = document.getElementById('completion-percentage');
+    
+    if (!templateFields || !completionPercentage) {
+        console.error('Template elements not found');
+        return;
+    }
+    
+    // Atualizar percentual de conclusão
+    completionPercentage.textContent = `${data.completion_status.percentage}%`;
+    
+    // Renderizar campos do template
+    templateFields.innerHTML = '';
+    
+    data.template_data.forEach(field => {
+        const fieldElement = document.createElement('div');
+        fieldElement.className = `p-4 rounded-lg border transition-all duration-300 ${
+            field.is_filled 
+                ? 'bg-green-50 border-green-200 dark:bg-green-900/20 dark:border-green-800' 
+                : 'bg-gray-50 border-gray-200 dark:bg-gray-800 dark:border-gray-700'
+        }`;
+        
+        fieldElement.innerHTML = `
+            <div class="flex items-center justify-between mb-2">
+                <h4 class="font-medium text-sm text-gray-700 dark:text-gray-300">${field.label}</h4>
+                <div class="flex items-center">
+                    ${field.is_filled 
+                        ? '<svg class="w-4 h-4 text-green-500" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path></svg>'
+                        : '<div class="w-4 h-4 border-2 border-gray-300 rounded-full"></div>'
+                    }
+                </div>
+            </div>
+            <div class="text-sm ${field.is_filled ? 'text-gray-900 dark:text-gray-100' : 'text-gray-500 dark:text-gray-400 italic'}">
+                ${field.is_filled ? field.value : 'Pendente...'}
+            </div>
+        `;
+        
+        templateFields.appendChild(fieldElement);
+    });
+    
+    // Adicionar animação de entrada para novos campos preenchidos
+    const filledFields = templateFields.querySelectorAll('.bg-green-50, .dark\\:bg-green-900\\/20');
+    filledFields.forEach(field => {
+        field.style.opacity = '0';
+        field.style.transform = 'translateY(10px)';
+        setTimeout(() => {
+            field.style.transition = 'opacity 0.3s ease, transform 0.3s ease';
+            field.style.opacity = '1';
+            field.style.transform = 'translateY(0)';
+        }, 100);
+    });
+}
+
+function scrollToBottom() {
+    const chatContainer = document.getElementById('chat-container');
+    if (chatContainer) {
+        chatContainer.scrollTop = chatContainer.scrollHeight;
+    }
+}
+</script>
+@endsection

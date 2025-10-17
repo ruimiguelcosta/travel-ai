@@ -77,7 +77,7 @@ class LLMService
     private function registerDrivers(): void
     {
         $this->registerDriver('chatgpt', new ChatGPTDriver(
-            apiKey: config('services.openai.api_key', ''),
+            apiKey: config('services.openai.api_key'),
             model: config('services.openai.model', 'gpt-3.5-turbo'),
             maxTokens: config('services.openai.max_tokens', 1000),
         ));

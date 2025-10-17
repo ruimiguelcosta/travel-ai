@@ -4,6 +4,8 @@ use App\Actions\Http\Budgets\IndexBudgetsAction;
 use App\Actions\Http\Budgets\ShowBudgetAction;
 use App\Actions\Http\Budgets\StoreBudgetAction;
 use App\Actions\Http\Budgets\UpdateBudgetAction;
+use App\Actions\Http\Chat\CheckResponseAction;
+use App\Actions\Http\Chat\GetTemplateDataAction;
 use App\Actions\Http\Chat\InitializeChatAction;
 use App\Actions\Http\Chat\ProcessMessageAction;
 use App\Actions\Http\SalesReports\ExportSalesReportExcelAction;
@@ -34,4 +36,6 @@ Route::prefix('sales-reports')->group(function () {
 Route::prefix('chat')->group(function () {
     Route::get('/initialize', InitializeChatAction::class);
     Route::post('/message', ProcessMessageAction::class);
+    Route::get('/response/{sessionId}', CheckResponseAction::class);
+    Route::get('/template/{sessionId}', GetTemplateDataAction::class);
 });

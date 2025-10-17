@@ -17,15 +17,32 @@ class ChatService
     public function initializeChat(?string $browserLanguage = null): ChatResponseData
     {
         $greeting = $this->greetingService->generateGreeting($browserLanguage);
-        $sessionId = $this->generateSessionId();
+
+        // Criar sessão na base de dados
+        $sessionService = app(\App\Domain\Chat\Services\ChatSessionService::class);
+        $session = $sessionService->createSession($greeting['language']);
+
+        // Usar mensagem de boas-vindas do TravelTemplateService
+        $templateService = app(\App\Domain\Chat\Services\TravelTemplateService::class);
+        $welcomeMessage = $templateService->getWelcomeMessage($greeting['language']);
+
+        // Guardar mensagem de boas-vindas na base de dados
+        $sessionService->addMessage(
+            $session->session_id,
+            'system',
+            $welcomeMessage,
+            $greeting['language'],
+            ['time_of_day' => $greeting['time_of_day'], 'template_mode' => true]
+        );
 
         return new ChatResponseData(
-            message: $greeting['full_message'],
+            message: $welcomeMessage,
             language: $greeting['language'],
-            sessionId: $sessionId,
+            sessionId: $session->session_id,
             type: 'greeting',
             metadata: [
                 'time_of_day' => $greeting['time_of_day'],
+                'template_mode' => true,
             ]
         );
     }

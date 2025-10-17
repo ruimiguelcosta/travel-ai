@@ -167,7 +167,7 @@
         </div>
 
         <!-- Main Content -->
-        <main class="flex-1 flex flex-col">
+        <main class="flex-1 flex flex-col h-screen">
             <header class="h-16 border-b flex items-center px-6 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 sticky top-0 z-10">
                 <button id="sidebar-toggle" class="h-7 w-7 inline-flex items-center justify-center rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 hover:bg-accent hover:text-accent-foreground">
                     <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -175,7 +175,7 @@
                     </svg>
                 </button>
             </header>
-            <div class="flex-1 p-6 overflow-auto">
+            <div class="flex-1 p-6 h-[calc(100vh-4rem)]">
                 @yield('content')
             </div>
         </main>
