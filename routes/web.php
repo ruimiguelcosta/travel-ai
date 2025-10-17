@@ -1,9 +1,8 @@
 <?php
 
-use Illuminate\Support\Facades\Route;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use App\Models\User;
+use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
     return view('auth.login');
@@ -17,6 +16,7 @@ Route::post('/login', function (Request $request) {
 
     if (Auth::attempt($credentials)) {
         $request->session()->regenerate();
+
         return redirect()->route('admin.dashboard');
     }
 
@@ -29,6 +29,7 @@ Route::post('/logout', function (Request $request) {
     Auth::logout();
     $request->session()->invalidate();
     $request->session()->regenerateToken();
+
     return redirect()->route('login');
 })->name('logout');
 
@@ -46,7 +47,7 @@ Route::prefix('admin')->middleware('auth')->group(function () {
             ->with('integrations')
             ->where('is_active', true)
             ->get();
-        
+
         return view('admin.integracoes', compact('integrationCategories'));
     })->name('admin.integracoes');
 

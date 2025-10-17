@@ -62,7 +62,7 @@ export default function Copilot() {
         </p>
       </div>
 
-      <Card className="h-[calc(100%-6rem)] flex flex-col">
+      <Card className="h-[calc(100%-6rem)] flex flex-col max-w-full lg:max-w-[50%]">
         <CardHeader>
           <CardTitle>Chat com IA</CardTitle>
           <CardDescription>
@@ -85,7 +85,7 @@ export default function Copilot() {
                     </div>
                   )}
                   <div
-                    className={`max-w-[80%] rounded-2xl px-4 py-3 ${
+                    className={`max-w-[40%] rounded-2xl px-4 py-3 ${
                       message.role === 'user'
                         ? 'bg-primary text-primary-foreground'
                         : 'bg-muted'

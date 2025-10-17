@@ -13,7 +13,7 @@
         </p>
     </div>
 
-    <div class="rounded-lg border bg-card text-card-foreground shadow-sm h-[calc(100%-6rem)] flex flex-col">
+    <div class="rounded-lg border bg-card text-card-foreground shadow-sm h-[calc(100%-6rem)] flex flex-col max-w-full lg:max-w-[50%]">
         <div class="flex flex-col space-y-1.5 p-6">
             <h3 class="text-2xl font-semibold leading-none tracking-tight">Chat com IA</h3>
             <p class="text-sm text-muted-foreground">
@@ -29,14 +29,14 @@
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path>
                             </svg>
                         </div>
-                        <div class="max-w-[80%] rounded-2xl px-4 py-3 bg-muted">
+                        <div class="max-w-[40%] rounded-2xl px-4 py-3 bg-muted">
                             <p class="text-sm">Olá! Sou seu assistente AI. Como posso ajudar você hoje?</p>
                             <p class="text-xs opacity-60 mt-1">14:30</p>
                         </div>
                     </div>
                     
                     <div class="flex gap-3 justify-end">
-                        <div class="max-w-[80%] rounded-2xl px-4 py-3 bg-primary text-primary-foreground">
+                        <div class="max-w-[40%] rounded-2xl px-4 py-3 bg-primary text-primary-foreground">
                             <p class="text-sm">Como posso gerar um relatório de vendas?</p>
                             <p class="text-xs opacity-60 mt-1">14:32</p>
                         </div>
@@ -53,7 +53,7 @@
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path>
                             </svg>
                         </div>
-                        <div class="max-w-[80%] rounded-2xl px-4 py-3 bg-muted">
+                        <div class="max-w-[40%] rounded-2xl px-4 py-3 bg-muted">
                             <p class="text-sm">Para gerar um relatório de vendas, você pode:</p>
                             <ul class="text-sm mt-2 space-y-1">
                                 <li>• Acessar a seção "Relatórios" no menu</li>
@@ -66,7 +66,7 @@
                     </div>
                     
                     <div class="flex gap-3 justify-end">
-                        <div class="max-w-[80%] rounded-2xl px-4 py-3 bg-primary text-primary-foreground">
+                        <div class="max-w-[40%] rounded-2xl px-4 py-3 bg-primary text-primary-foreground">
                             <p class="text-sm">Qual é o melhor horário para enviar propostas?</p>
                             <p class="text-xs opacity-60 mt-1">14:35</p>
                         </div>
@@ -83,7 +83,7 @@
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path>
                             </svg>
                         </div>
-                        <div class="max-w-[80%] rounded-2xl px-4 py-3 bg-muted">
+                        <div class="max-w-[40%] rounded-2xl px-4 py-3 bg-muted">
                             <p class="text-sm">Baseado nos dados históricos da sua empresa, o melhor horário para enviar propostas é:</p>
                             <ul class="text-sm mt-2 space-y-1">
                                 <li>• <strong>Terças e quartas-feiras</strong> entre 10h e 14h</li>
